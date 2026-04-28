@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Columbia University — Travel Expense Policy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800;900&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --blue: #3f57bd;
+  --blue-dark: #2e42a0;
+  --navy: #183765;
+  --ink: #172033;
+  --muted: #64748b;
+  --line: #d8dee8;
+  --paper-edge: #d4cfbf;
+  --paper-ink: #1a1d20;
+  --paper-ink-dim: #5a5d62;
+  --gold: #B68F47;
+  --gold-bright: #C9A050;
+  --gold-pale: #E8D9B0;
+  --gold-bg: #fff8df;
+  --sticky-yellow: #fbe588;
+  --sticky-blue: #c5dceb;
+  --sticky-pink: #f4b8b8;
+  --sticky-mint: #cfe3c5;
+  --bg: #e6e6e6;
+  --white: #ffffff;
+  --off-white: #fffdf6;
+  --red: #b91c1c;
+  --red-bg: #fff5f5;
+  --red-border: #fecaca;
+  --green: #166534;
+  --green-bg: #f0fdf4;
+  --green-border: #bbf7d0;
+  --amber: #92400e;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--ink); font-family: 'Source Sans 3', Arial, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body {
+  background-image:
+    linear-gradient(rgba(117,168,201,.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(117,168,201,.18) 1px, transparent 1px),
+    linear-gradient(rgba(117,168,201,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(117,168,201,.07) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+}
+
+.progress-rail { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--line); z-index: 600; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--gold)); width: 0%; transition: width .1s linear; }
+
+.overlay { position: fixed; inset: 0; background: rgba(23,32,51,.45); z-index: 400; opacity: 0; pointer-events: none; transition: opacity .28s; }
+.overlay.active { opacity: 1; pointer-events: all; }
+
+.side-panel {
+  position: fixed; top: 0; right: -480px;
+  width: 440px; max-width: 95vw; height: 100vh;
+  background: var(--white);
+  border-left: 3px solid var(--blue);
+  z-index: 500;
+  display: flex; flex-direction: column;
+  transition: right .35s cubic-bezier(.25,.46,.45,.94);
+  box-shadow: -4px 0 32px rgba(0,0,0,.12);
+}
+.side-panel.open { right: 0; }
+.panel-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: space-between; background: var(--navy); }
+.panel-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--gold); margin-bottom: .35rem; display: flex; align-items: center; gap: 10px; }
+.panel-eyebrow::before { content: ""; display: block; width: 20px; height: 1px; background: var(--gold); }
+.panel-title { font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 500; color: #ffffff; line-height: 1.2; }
+.panel-close { background: none; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.7); cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .1em; padding: .25rem .55rem; border-radius: 2px; transition: all .15s; flex-shrink: 0; }
+.panel-close:hover { border-color: var(--gold); color: var(--gold); }
+.panel-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem 2.5rem; scrollbar-width: thin; scrollbar-color: var(--blue) #f0f4ff; }
+
+.glo-entry { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.glo-entry:last-child { border-bottom: none; }
+.glo-term { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 600; color: var(--blue); letter-spacing: .06em; margin-bottom: .3rem; }
+.glo-def { font-size: .88rem; color: var(--paper-ink-dim); line-height: 1.65; }
+
+.contact-entry { display: flex; gap: .85rem; padding: .85rem; border: 1.5px solid var(--line); border-radius: 6px; margin-bottom: .65rem; background: var(--off-white); transition: border-color .15s, transform .15s; }
+.contact-entry:hover { border-color: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(63,87,189,.08); }
+.contact-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: .1rem; }
+.contact-name { font-family: 'Source Sans 3', sans-serif; font-size: .85rem; font-weight: 800; color: var(--navy); margin-bottom: .15rem; }
+.contact-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+
+.key-indicator { position: fixed; bottom: 1.5rem; left: 1.25rem; z-index: 200; background: var(--white); border: 1.5px solid var(--line); border-radius: 8px; padding: .55rem .75rem .6rem; box-shadow: 0 2px 8px rgba(0,0,0,.08); font-family: 'JetBrains Mono', monospace; min-width: 148px; }
+.key-indicator-title { font-size: .6rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: .45rem; border-bottom: 1px solid var(--line); padding-bottom: .35rem; }
+.key-row { display: flex; align-items: center; gap: .45rem; padding: .2rem 0; font-size: .62rem; color: var(--muted); transition: color .2s; }
+.key-row.lit { color: var(--navy); }
+.key-badge { background: var(--blue); color: #fff; font-weight: 700; font-size: .58rem; padding: .1rem .32rem; border-radius: 3px; min-width: 22px; text-align: center; flex-shrink: 0; }
+.key-action { flex: 1; }
+.key-sep { width: 100%; height: 1px; background: var(--line); margin: .25rem 0; }
+
+.topbar { height: 68px; background: var(--white); border-bottom: 1px solid #b8c5d8; display: flex; align-items: center; padding: 0 2rem; gap: 1rem; position: sticky; top: 0; z-index: 300; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.logo { color: var(--navy); font-size: 13px; font-weight: 800; line-height: 1.1; }
+.logo span { display: block; font-size: 7px; letter-spacing: .1em; font-weight: 600; color: var(--muted); }
+.topbar-divider { width: 1px; height: 28px; background: var(--line); }
+.topbar-title { font-size: 18px; color: var(--navy); font-weight: 600; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: .75rem; }
+.topbar-code { font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .15em; color: var(--blue); border: 1.5px solid var(--blue); border-radius: 4px; padding: .2rem .55rem; font-weight: 600; }
+.revised-pill { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .15em; text-transform: uppercase; background: #fff8df; border: 1.5px solid var(--gold); color: var(--gold-bright); border-radius: 999px; padding: .2rem .6rem; font-weight: 700; }
+
+.report-band { background: var(--blue); color: #fff; padding: 1.1rem 2rem; display: flex; align-items: center; gap: 1.5rem; border-bottom: 3px solid var(--navy); flex-wrap: wrap; }
+.band-label { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; opacity: .75; margin-bottom: .2rem; }
+.band-value { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 500; }
+.band-divider { width: 1px; height: 36px; background: rgba(255,255,255,.2); }
+
+.hero-intro { padding: 2.5rem 0 2rem; border-bottom: 2px solid var(--line); margin-bottom: 2.5rem; }
+.hero-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-bottom: .75rem; font-weight: 700; }
+.hero-title { font-family: 'Fraunces', serif; font-size: 2.6rem; font-weight: 400; color: var(--paper-ink); line-height: 1.08; letter-spacing: -.02em; margin-bottom: 1rem; }
+.hero-title em { font-style: italic; color: var(--blue); }
+.hero-rule { width: 48px; height: 3px; background: var(--gold); margin-bottom: .9rem; }
+.hero-meta { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.hero-revised { font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: .12em; color: var(--amber); font-weight: 700; background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 4px; padding: .2rem .55rem; }
+.hero-code { font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: .12em; color: var(--muted); }
+
+main { max-width: 980px; margin: 0 auto; padding: 2.5rem 2.5rem 5rem; }
+
+.project-callout { padding: 1.1rem 1.4rem; background: var(--off-white); border: 1.5px solid var(--paper-edge); border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0; margin-bottom: 2.5rem; font-size: .95rem; line-height: 1.65; color: var(--paper-ink-dim); box-shadow: 0 2px 0 rgba(0,0,0,.04), 0 6px 14px rgba(0,0,0,.04); }
+.project-callout strong { font-weight: 800; color: var(--navy); }
+
+.eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--gold); margin-bottom: .6rem; display: inline-flex; align-items: center; gap: 12px; font-weight: 600; }
+.eyebrow::before, .eyebrow::after { content: ""; display: block; width: 24px; height: 1px; background: var(--gold); }
+
+.section { margin-bottom: 3rem; scroll-margin-top: 80px; }
+.section-title { font-family: 'Fraunces', serif; font-size: 1.7rem; font-weight: 400; letter-spacing: -.01em; color: var(--paper-ink); padding-bottom: .65rem; border-bottom: 2px solid var(--line); margin-bottom: 1.4rem; line-height: 1.15; }
+.section-title em { font-style: italic; color: var(--blue); }
+
+.threshold-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin: 1.25rem 0 .75rem; }
+.threshold-card { position: relative; padding: 1.5rem 1rem 1.25rem; text-align: center; border-radius: 2px; transition: transform .2s ease, box-shadow .2s ease; cursor: default; }
+.threshold-card:nth-child(1) { background: #fbe588; transform: rotate(-1.2deg); box-shadow: 2px 4px 8px rgba(0,0,0,.12), 6px 12px 20px rgba(0,0,0,.1); }
+.threshold-card:nth-child(2) { background: #c5dceb; transform: rotate(.8deg); box-shadow: 2px 4px 8px rgba(0,0,0,.12), 6px 12px 20px rgba(0,0,0,.1); }
+.threshold-card:nth-child(3) { background: #cfe3c5; transform: rotate(-0.5deg); box-shadow: 2px 4px 8px rgba(0,0,0,.12), 6px 12px 20px rgba(0,0,0,.1); }
+.threshold-card::before { content: ""; position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 64px; height: 18px; background: rgba(197,220,235,.65); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.threshold-card:nth-child(1)::before { background: rgba(197,220,235,.6); }
+.threshold-card:nth-child(2)::before { background: rgba(251,229,136,.5); }
+.threshold-card:nth-child(3)::before { background: rgba(197,220,235,.6); }
+.threshold-card:hover { transform: translateY(-3px) rotate(0deg); box-shadow: 4px 8px 16px rgba(0,0,0,.15), 8px 18px 32px rgba(0,0,0,.12); }
+.threshold-label { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: #4a4d52; margin-bottom: .5rem; font-weight: 700; }
+.threshold-amount { font-family: 'Fraunces', serif; font-size: 2.8rem; font-weight: 400; color: var(--navy); line-height: 1; }
+.threshold-sub { font-family: 'JetBrains Mono', monospace; font-size: .6rem; color: #5a5d62; margin-top: .35rem; letter-spacing: .08em; }
+
+.policy-table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-bottom: 1.25rem; border: 1.5px solid var(--line); border-radius: 6px; overflow: hidden; }
+.policy-table th { background: var(--navy); font-family: 'JetBrains Mono', monospace; font-size: .63rem; letter-spacing: .15em; text-transform: uppercase; color: rgba(255,255,255,.85); padding: .65rem .9rem; text-align: left; font-weight: 600; }
+.policy-table td { padding: .75rem .9rem; border-bottom: 1px solid var(--line); color: var(--paper-ink); vertical-align: top; line-height: 1.5; }
+.policy-table tr:last-child td { border-bottom: none; }
+.policy-table tr:nth-child(even) td { background: #f8fafc; }
+.policy-table tr:hover td { background: #f0f4ff; }
+.amt { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--green); font-size: .88rem; }
+.amt-red { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--red); font-size: .88rem; }
+
+.approval-box { background: var(--green-bg); border: 1.5px solid var(--green-border); border-left: 4px solid #16a34a; border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; margin-top: 1.25rem; }
+.approval-box .box-label { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--green); margin-bottom: .6rem; font-weight: 700; }
+.warning-box { background: var(--red-bg); border: 1.5px solid var(--red-border); border-left: 4px solid #dc2626; border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; margin-top: 1.25rem; }
+.warning-box .box-label { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--red); margin-bottom: .6rem; font-weight: 700; }
+.info-box { background: #eff6ff; border: 1.5px solid #bfdbfe; border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; margin-top: 1.25rem; }
+.info-box .box-label { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); margin-bottom: .6rem; font-weight: 700; }
+
+.item-list { list-style: none; }
+.item-list li { display: flex; gap: .65rem; padding: .6rem 0; border-bottom: 1px solid var(--line); font-size: .92rem; line-height: 1.55; color: var(--paper-ink); }
+.item-list li:last-child { border-bottom: none; }
+.item-list li::before { content: '→'; font-family: 'JetBrains Mono', monospace; color: var(--gold-bright); flex-shrink: 0; margin-top: .05rem; font-weight: 700; }
+
+.check-list { list-style: none; }
+.check-list li { display: flex; gap: .65rem; padding: .5rem 0; border-bottom: 1px solid var(--line); font-size: .88rem; line-height: 1.55; color: var(--paper-ink); }
+.check-list li:last-child { border-bottom: none; }
+.check-list li::before { content: '✓'; font-family: 'JetBrains Mono', monospace; color: #16a34a; flex-shrink: 0; font-weight: 700; }
+
+.x-list { list-style: none; }
+.x-list li { display: flex; gap: .65rem; padding: .5rem 0; border-bottom: 1px solid var(--line); font-size: .88rem; line-height: 1.55; color: var(--paper-ink); }
+.x-list li:last-child { border-bottom: none; }
+.x-list li::before { content: '✕'; font-family: 'JetBrains Mono', monospace; color: #dc2626; flex-shrink: 0; font-weight: 700; }
+
+.roles-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+.role-card { border: 1.5px solid var(--line); border-radius: 8px; padding: 1rem 1.15rem; background: var(--off-white); transition: border-color .15s, box-shadow .15s; }
+.role-card:hover { border-color: var(--blue); box-shadow: 0 4px 12px rgba(63,87,189,.08); }
+.role-icon { font-size: 1.4rem; margin-bottom: .5rem; }
+.role-name { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--navy); letter-spacing: .05em; text-transform: uppercase; margin-bottom: .4rem; }
+.role-desc { font-size: .83rem; color: var(--paper-ink-dim); line-height: 1.55; }
+
+.timeline { display: flex; gap: 0; margin: 1.25rem 0; position: relative; }
+.timeline::before { content: ""; position: absolute; top: 24px; left: 0; right: 0; height: 2px; background: var(--line); z-index: 0; }
+.tl-item { flex: 1; text-align: center; position: relative; z-index: 1; }
+.tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); box-shadow: 0 0 0 2px var(--blue); margin: 0 auto 8px; }
+.tl-dot.warn { background: #dc2626; box-shadow: 0 0 0 2px #dc2626; }
+.tl-dot.gold { background: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.tl-label { font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700; color: var(--navy); letter-spacing: .05em; margin-bottom: 4px; }
+.tl-sub { font-size: .72rem; color: var(--muted); line-height: 1.35; }
+
+.not-allowed { background: #fff5f5; border: 1.5px solid #fecaca; border-left: 4px solid #dc2626; border-radius: 0 6px 6px 0; padding: 1rem 1.25rem; }
+.not-allowed .item-list li::before { content: '✕'; color: #dc2626; }
+
+.sticky { background: var(--sticky-yellow); color: #3a2e10; padding: 1.1rem 1.4rem 1.25rem; position: relative; transform: rotate(-.5deg); margin-top: 1.75rem; max-width: 520px; box-shadow: 2px 4px 8px rgba(0,0,0,.12), 6px 14px 24px rgba(0,0,0,.15); border-radius: 2px; }
+.sticky::before { content: ""; position: absolute; top: -10px; left: 32px; width: 80px; height: 18px; background: rgba(197,220,235,.7); transform: rotate(-2deg); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.sticky .sticky-label { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .25em; text-transform: uppercase; color: #7a5a1f; font-weight: 700; margin-bottom: .4rem; }
+.sticky p { font-family: 'Fraunces', serif; font-size: .98rem; font-style: italic; line-height: 1.55; }
+.sticky.blue { background: var(--sticky-blue); color: #1a3045; }
+.sticky.blue::before { background: rgba(251,229,136,.6); }
+.sticky.blue .sticky-label { color: #2a5070; }
+.sticky.mint { background: var(--sticky-mint); color: #1a3020; }
+.sticky.mint::before { background: rgba(251,229,136,.6); }
+.sticky.mint .sticky-label { color: #2a5030; }
+
+.golden-rule { margin-top: 2.5rem; background: var(--gold-bg); border: 1.5px solid #e7d6a2; border-left: 5px solid var(--gold); border-radius: 6px; padding: 1rem 1.25rem; font-size: .92rem; color: var(--paper-ink-dim); line-height: 1.5; }
+.golden-rule strong { color: var(--paper-ink); font-weight: 800; }
+
+.notes-block { background: var(--off-white); border: 1.5px solid var(--paper-edge); border-radius: 8px; padding: 1.4rem 1.5rem; margin-top: 1.5rem; box-shadow: 0 2px 0 rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06); }
+.notes-title { font-family: 'JetBrains Mono', monospace; font-size: .63rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 10px; }
+.notes-title::before, .notes-title::after { content: ""; display: block; width: 20px; height: 1px; background: var(--gold); }
+.note-item { padding: .7rem 0; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--paper-ink-dim); line-height: 1.6; }
+.note-item:last-child { border-bottom: none; }
+.note-item strong { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--navy); letter-spacing: .03em; display: block; margin-bottom: .2rem; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
+.col-block { background: var(--off-white); border: 1.5px solid var(--paper-edge); border-radius: 8px; padding: 1.1rem 1.25rem; }
+.col-block-title { font-family: 'JetBrains Mono', monospace; font-size: .65rem; font-weight: 700; color: var(--navy); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+.col-block.green-border { border-color: var(--green-border); border-left: 3px solid #16a34a; }
+.col-block.red-border { border-color: var(--red-border); border-left: 3px solid #dc2626; }
+.col-block .col-block-title.green { color: var(--green); }
+.col-block .col-block-title.red { color: var(--red); }
+
+.rate-badge { display: inline-flex; align-items: baseline; gap: .4rem; font-family: 'Fraunces', serif; background: var(--navy); color: #fff; border-radius: 6px; padding: .6rem 1.1rem; margin: .5rem .35rem 0 0; }
+.rate-badge .rate-amt { font-size: 2rem; font-weight: 400; line-height: 1; }
+.rate-badge .rate-unit { font-family: 'JetBrains Mono', monospace; font-size: .68rem; opacity: .75; }
+.rate-year { font-family: 'JetBrains Mono', monospace; font-size: .62rem; color: var(--muted); margin-top: .3rem; }
+
+.section-divider { display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 2rem; }
+.divider-line { flex: 1; height: 1px; background: var(--line); }
+.divider-label { font-family: 'JetBrains Mono', monospace; font-size: .65rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+.lodging-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.25rem; margin: 1.25rem 0; }
+.lodging-card { background: var(--off-white); border: 1.5px solid var(--line); border-radius: 8px; padding: 1.25rem; text-align: center; }
+.lodging-card.domestic { border-top: 3px solid var(--blue); }
+.lodging-card.intl { border-top: 3px solid var(--gold); }
+.lodging-type { font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: .5rem; font-weight: 700; }
+.lodging-rate { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 400; color: var(--navy); line-height: 1; }
+.lodging-sub { font-family: 'JetBrains Mono', monospace; font-size: .6rem; color: var(--muted); margin-top: .3rem; }
+.lodging-warn { font-size: .78rem; color: var(--red); margin-top: .5rem; font-weight: 600; }
+
+@media (max-width: 640px) {
+  main { padding: 1.5rem 1.1rem 3rem; }
+  .topbar { padding: 0 1rem; }
+  .band-divider, .band-value { display: none; }
+  .threshold-grid { gap: .5rem; }
+  .side-panel { width: 100%; max-width: 100vw; }
+  .roles-grid, .two-col, .lodging-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 1.8rem; }
+  .timeline { flex-direction: column; gap: 1rem; }
+  .timeline::before { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+<div class="overlay" id="overlay"></div>
+
+<!-- SIDE PANEL -->
+<div class="side-panel" id="sidePanel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-eyebrow" id="panelEyebrow">Reference</div>
+      <div class="panel-title" id="panelTitle">Definitions</div>
+    </div>
+    <button class="panel-close" id="panelClose">ESC ✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<!-- KEY HINTS -->
+<div class="key-indicator">
+  <div class="key-indicator-title">Keyboard Shortcuts</div>
+  <div class="key-row" id="hintUp">
+    <span class="key-badge">↑</span><span class="key-action">Definitions</span>
+  </div>
+  <div class="key-row" id="hintRight">
+    <span class="key-badge">→</span><span class="key-action">Key Contacts</span>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">♔ Columbia University<span>COLUMBIA ENGINEERING</span></div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-title">Travel Expense Policy</div>
+  <div class="topbar-right">
+    <span class="topbar-code">TEP-2026</span>
+    <span class="revised-pill">Rev. Jan 2026</span>
+  </div>
+</div>
+
+<!-- BAND -->
+<div class="report-band">
+  <div>
+    <div class="band-label">Scope</div>
+    <div class="band-value">All Employees, Students & Visitors Seeking Travel Reimbursement</div>
+  </div>
+  <div class="band-divider"></div>
+  <div>
+    <div class="band-label">Last Revised</div>
+    <div class="band-value">January 6, 2026</div>
+  </div>
+</div>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero-intro">
+    <div class="hero-eyebrow">Columbia Engineering</div>
+    <h1 class="hero-title">Travel <em>Expense Policy</em><br>Quick Reference Guide</h1>
+    <div class="hero-rule"></div>
+    <div class="hero-meta">
+      <span class="hero-revised">⚠ Revised January 6, 2026</span>
+      <span class="hero-code">IRS Accountable Plan · Fly America Act · Sponsored Project Compliance</span>
+    </div>
+  </div>
+
+  <!-- OVERVIEW CALLOUT -->
+  <div class="project-callout">
+    The University reimburses faculty, staff, and students for <strong>necessary and reasonable</strong> travel expenses incurred on approved University business. Travel should be booked at the <strong>lowest logical cost</strong> with maximum advance notice. Where a discrepancy exists between this policy and a department, granting agency, or donor — the <strong>more restrictive policy governs</strong>.
+  </div>
+
+  <!-- SUBMISSION TIMELINE -->
+  <div class="section" id="sec-timeline">
+    <div class="eyebrow">IRS Accountable Plan</div>
+    <div class="section-title">Submission <em>Deadlines</em></div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-label">10 Business Days</div>
+        <div class="tl-sub">Target: submit within 10 business days of trip end date</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-label">120 Days</div>
+        <div class="tl-sub">Hard deadline — late requires Payee justification + Financial Approval</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot warn"></div>
+        <div class="tl-label">120+ Days</div>
+        <div class="tl-sub">May be treated as <strong>taxable income</strong> to employee</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot gold"></div>
+        <div class="tl-label">Jun 30</div>
+        <div class="tl-sub">Fiscal year end — report prior to ensure budget accuracy</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot warn"></div>
+        <div class="tl-label">365 Days</div>
+        <div class="tl-sub">Absolute cutoff — <strong>no reimbursement</strong> after 1 year</div>
+      </div>
+    </div>
+    <div class="sticky blue">
+      <div class="sticky-label">Student Note</div>
+      <p>Students should also submit within 120 days — but will not receive imputed income if submitted after the 120-day window.</p>
+    </div>
+  </div>
+
+  <!-- ROLES -->
+  <div class="section" id="sec-roles">
+    <div class="eyebrow">Accountability</div>
+    <div class="section-title">Roles & <em>Responsibilities</em></div>
+    <div class="roles-grid">
+      <div class="role-card">
+        <div class="role-icon">✈️</div>
+        <div class="role-name">Traveler</div>
+        <div class="role-desc">Incurs the expense. Responsible for receipts, documenting business purpose, timely submission (10-day target; 120-day max), and accuracy of the Expense Report in Concur.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">📋</div>
+        <div class="role-name">Preparer Delegate</div>
+        <div class="role-desc">Prepares Expense Reports on behalf of others. Confirms nature of expenditures, completeness of documentation, accounting accuracy, and proper account segregation.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">✅</div>
+        <div class="role-name">Approver (Financial / SBO)</div>
+        <div class="role-desc">Must be senior to the traveler. Certifies travel is appropriate, valid, policy-compliant, and within budget. <em>Cannot approve own expenses.</em> SBO required for exceptions.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">💳</div>
+        <div class="role-name">Accounts Payable</div>
+        <div class="role-desc">Processes approved Expense Reports, issues payments, performs audits, reviews exception requests, and determines imputed income applicability.</div>
+      </div>
+    </div>
+    <div class="warning-box">
+      <div class="box-label">Key Rule</div>
+      Under no circumstances may an individual approve their own report. Deans and V.P.s must have reports signed by the appropriate approver. If the Financial Approver reports to the Payee, an ADHOC approver (DAF or SBO) must be inserted.
+    </div>
+  </div>
+
+  <!-- RECEIPTS & DOCUMENTATION -->
+  <div class="section" id="sec-receipts">
+    <div class="eyebrow">IRS Requirements</div>
+    <div class="section-title">Receipts & <em>Documentation</em></div>
+    <div class="two-col">
+      <div class="col-block">
+        <div class="col-block-title">What a Receipt Must Include</div>
+        <ul class="check-list">
+          <li>Date of purchase</li>
+          <li>Vendor name</li>
+          <li>Itemized list with unit prices</li>
+          <li>Total amount</li>
+          <li>Proof of payment (card type, last 4 digits, "Paid," or zero balance)</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <div class="col-block-title">When Receipts Are Required</div>
+        <ul class="check-list">
+          <li>Always: air, rail, lodging, rental car</li>
+          <li>All other expenses ≥ $50</li>
+          <li>&lt;$50: Missing Receipt Affidavit + Financial Approval</li>
+          <li>E-receipts alone for airfare: NOT accepted by AP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="approval-box">
+      <div class="box-label">Business Purpose Standard</div>
+      Must be specific enough for a third-party reviewer. <strong>"Travel to Boston, MA to speak at Accounts Payable Network conference"</strong> ✓ — <strong>"Travel to Boston for conference"</strong> ✗
+    </div>
+  </div>
+
+  <!-- AIR TRAVEL -->
+  <div class="section" id="sec-air">
+    <div class="eyebrow">Air Travel</div>
+    <div class="section-title">Airfare <em>Rules</em></div>
+
+    <div class="project-callout">
+      Book at the <strong>Lowest Logical Fare (LLF)</strong> — least expensive non-refundable fare for non-stop flights that allows the traveler to meet their business objective without prolonging the trip. Book <strong>14+ days in advance</strong> whenever possible. Economy/coach class required on all commercial carriers.
+    </div>
+
+    <table class="policy-table">
+      <thead>
+        <tr><th>Class</th><th>Rule</th><th>Condition</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Economy / Coach</strong></td>
+          <td class="amt">Standard — always required</td>
+          <td>Default for all domestic and international travel</td>
+        </tr>
+        <tr>
+          <td><strong>Business / First Class</strong></td>
+          <td class="amt">Permitted with approval</td>
+          <td>Any single flight segment with scheduled in-air time <strong>&gt;5 hours</strong>, OR documented medical condition approved by Leave Management. Financial Approver must confirm funds available <em>prior to purchase</em>.</td>
+        </tr>
+        <tr>
+          <td><strong>Business / First &lt;5 hrs</strong></td>
+          <td class="amt-red">Not reimbursed above coach</td>
+          <td>Will be reimbursed only up to economy/coach equivalent. Difference must be segregated in all cases.</td>
+        </tr>
+        <tr>
+          <td><strong>Non-commercial</strong> (jets, helicopters)</td>
+          <td class="amt-red">Not allowed</td>
+          <td>Corporate jets and helicopters are prohibited under any circumstance</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes-block">
+      <div class="notes-title">NDC Bundled Airfare</div>
+      <div class="note-item"><strong>What It Is</strong>New Distribution Capability (NDC) fares bundle seat assignments, checked baggage, and priority boarding into the upfront price.</div>
+      <div class="note-item"><strong>When Allowed</strong>Pre-approved by department; bundled fare must be cost-effective vs. base fare + add-ons; traveler provides clear justification.</div>
+      <div class="note-item"><strong>Sponsored / Federal Grants</strong>NDC fares must still comply with the Fly America Act — US-flag carriers required unless specific exceptions apply. Full documentation of cost components required.</div>
+    </div>
+
+    <div class="info-box" style="margin-top:1.25rem;">
+      <div class="box-label">Fly America Act</div>
+      Government-sponsored grant travel must use a US-owned airline or US-designated codeshare flight number. If travel did not occur on a US carrier, complete the <strong>Fly America Exception Form</strong> and attach to the Expense Report. Financial Approver in Concur must acknowledge the exception reason.
+    </div>
+
+    <div class="approval-box" style="margin-top:1rem;">
+      <div class="box-label">Airfare Documentation Required</div>
+      Passenger ticket/receipt, boarding pass, or itinerary must include: dates and points of departure/arrival, travel class, total amount, and proof of payment.
+    </div>
+  </div>
+
+  <!-- RAIL/BUS -->
+  <div class="section" id="sec-rail">
+    <div class="eyebrow">Ground Travel</div>
+    <div class="section-title">Rail, Bus & <em>Ground Transportation</em></div>
+
+    <div class="notes-block">
+      <div class="notes-title">Rail & Bus</div>
+      <div class="note-item"><strong>Booking</strong>Purchase at LLF, 14+ days in advance. Economy class standard.</div>
+      <div class="note-item"><strong>Domestic First Class / Business</strong>Requires justification + Financial Approval. Must segregate and provide cost comparison for amount above economy. Acela excluded from segregation requirement.</div>
+      <div class="note-item"><strong>International Rail</strong>No segregation required regardless of class selected.</div>
+      <div class="note-item"><strong>Documentation</strong>Ticket/stub must include: dates, origin/destination, class, total fare, and proof of payment.</div>
+    </div>
+
+    <div class="section-divider"><div class="divider-line"></div><div class="divider-label">Rental Cars</div><div class="divider-line"></div></div>
+
+    <div class="project-callout" style="margin-bottom:1.25rem;">
+      Rent a vehicle only when less expensive comparable transportation is unavailable. Reimbursement limited to <strong>sub-compact, compact, or intermediate/mid-size</strong> for individual travelers. Larger vehicles require documented business justification. <strong>Car sharing platforms (e.g., Turo) are not reimbursable.</strong>
+    </div>
+
+    <table class="policy-table">
+      <thead>
+        <tr><th>Situation</th><th>Insurance Rule</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Hertz (US preferred) — Domestic</strong></td>
+          <td>Do NOT purchase LDW or Liability — already negotiated and included. Not reimbursed if purchased.</td>
+        </tr>
+        <tr>
+          <td><strong>Other US Rental Companies</strong></td>
+          <td>Must purchase LDW and Liability insurance. Visa Corporate Card holders have auto collision coverage (not liability — must buy liability separately).</td>
+        </tr>
+        <tr>
+          <td><strong>International Rentals (any company)</strong></td>
+          <td>LDW and Liability insurance must always be purchased internationally — including Hertz.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box">
+      <div class="box-label">Always Non-Reimbursable</div>
+      Parking fines and moving violations on rental or personal vehicles will never be reimbursed under any circumstance.
+    </div>
+
+    <div class="section-divider"><div class="divider-line"></div><div class="divider-label">Personal Vehicle</div><div class="divider-line"></div></div>
+
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-start;">
+      <div>
+        <div class="rate-badge"><span class="rate-amt">$.700</span><span class="rate-unit">/ mile</span></div>
+        <div class="rate-year" style="padding-left:.25rem;">On or after Jan 1, 2025</div>
+      </div>
+      <div>
+        <div class="rate-badge" style="background:var(--blue);"><span class="rate-amt">$.725</span><span class="rate-unit">/ mile</span></div>
+        <div class="rate-year" style="padding-left:.25rem;">On or after Jan 1, 2026</div>
+      </div>
+    </div>
+
+    <p style="font-size:.88rem;color:var(--paper-ink-dim);line-height:1.6;margin-bottom:1rem;">Mileage covers fuel, maintenance, insurance, and all operating costs — no separate reimbursement for these. Tolls and necessary parking may also be reimbursed. The University assumes no liability for vehicle damage, deductibles, or repairs.</p>
+
+    <div class="info-box">
+      <div class="box-label">500+ Mile Rule</div>
+      If personal vehicle is used primarily for convenience and the trip exceeds 500 miles from origin, reimbursement will not exceed the lesser of: (1) mileage reimbursement + tolls, OR (2) round-trip airfare between nearest commercial airports + transfer costs.
+    </div>
+  </div>
+
+  <!-- LODGING -->
+  <div class="section" id="sec-lodging">
+    <div class="eyebrow">Accommodations</div>
+    <div class="section-title">Lodging <em>Thresholds</em></div>
+
+    <div class="lodging-grid">
+      <div class="lodging-card domestic">
+        <div class="lodging-type">🇺🇸 Domestic (US & Territories)</div>
+        <div class="lodging-rate">$350</div>
+        <div class="lodging-sub">per night, excl. taxes & fees</div>
+        <div class="lodging-warn">$351–$525: Justification + Financial Approval<br>$525+: SBO Approval Required</div>
+      </div>
+      <div class="lodging-card intl">
+        <div class="lodging-type">🌍 International</div>
+        <div class="lodging-rate">$400</div>
+        <div class="lodging-sub">per night (USD), excl. taxes & fees</div>
+        <div class="lodging-warn">$401–$600: Justification + Financial Approval<br>$600+: SBO Approval Required</div>
+      </div>
+    </div>
+
+    <div class="notes-block">
+      <div class="notes-title">Lodging Rules</div>
+      <div class="note-item"><strong>Conference Hotels</strong>If the conference hotel rate exceeds thresholds, attach the conference flyer identifying the location and offered accommodations.</div>
+      <div class="note-item"><strong>Advance Payments</strong>Personal advance hotel payments will not be reimbursed until after the trip end date. Use the Corporate Card for advance bookings to avoid being out-of-pocket.</div>
+      <div class="note-item"><strong>Private Residence</strong>If staying with relatives/friends, may be reimbursed for reasonable appreciation expenses (small gift or meals) not to exceed $100. Over $100 requires Payee justification.</div>
+      <div class="note-item"><strong>Documentation Required</strong>Itemized hotel bill with: dates of arrival/departure, detailed charges, total amount, and proof of payment.</div>
+    </div>
+  </div>
+
+  <!-- MEALS -->
+  <div class="section" id="sec-meals">
+    <div class="eyebrow">University Policy</div>
+    <div class="section-title">Meal <em>Thresholds</em></div>
+
+    <div class="threshold-grid">
+      <div class="threshold-card">
+        <div class="threshold-label">Breakfast</div>
+        <div class="threshold-amount">$25</div>
+        <div class="threshold-sub">per person, excl. tax & tip</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-label">Lunch</div>
+        <div class="threshold-amount">$35</div>
+        <div class="threshold-sub">per person, excl. tax & tip</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-label">Dinner</div>
+        <div class="threshold-amount">$75</div>
+        <div class="threshold-sub">per person, excl. tax & tip</div>
+      </div>
+    </div>
+
+    <p style="font-size:.85rem;color:var(--muted);margin:.75rem 0 1.5rem;">SBO approval required if thresholds exceeded — excess must be segregated. Tips in excess of 20% will not be reimbursed. These are not per diems — submit individual receipts showing actual cost.</p>
+
+    <table class="policy-table">
+      <thead>
+        <tr><th>Meal Type</th><th>Threshold</th><th>Approval Required</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Individual Travel Meals <em>(traveler alone)</em></td>
+          <td class="amt">$25 / $35 / $75</td>
+          <td>SBO if exceeded</td>
+          <td>Actual receipts required; not a per diem</td>
+        </tr>
+        <tr>
+          <td>Business Meals with External Guests <em>(donors, trustees, prospects, speakers)</em></td>
+          <td class="amt">$150 / pp</td>
+          <td>SBO if exceeded</td>
+          <td>Must produce documented business benefit; attendee list required</td>
+        </tr>
+        <tr>
+          <td>Alcohol</td>
+          <td class="amt-red">Allowable</td>
+          <td>—</td>
+          <td>Must be itemized and segregated; <strong>never</strong> charged to sponsored project</td>
+        </tr>
+        <tr>
+          <td>Tips / Gratuities</td>
+          <td class="amt-red">≤ 20%</td>
+          <td>—</td>
+          <td>Tips exceeding 20% will not be reimbursed under any circumstance</td>
+        </tr>
+        <tr>
+          <td>Per Diems</td>
+          <td class="amt">GSA Rate</td>
+          <td>—</td>
+          <td>Must use per diem for all meals on same day (cannot mix with actuals). Not allowed without overnight stay. Allowable on grants unless grant prohibits.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sticky mint" style="transform:rotate(.4deg)">
+      <div class="sticky-label">Spouse / Dependent Rule</div>
+      <p>The University will not reimburse transportation, lodging, or meals for spouses, significant others, or dependents — except when travel is required by the University for a specific business event under a sponsored project. Reimbursement without business purpose = taxable income to the employee.</p>
+    </div>
+  </div>
+
+  <!-- TRAVEL ADVANCES -->
+  <div class="section" id="sec-advances">
+    <div class="eyebrow">Cash Advances</div>
+    <div class="section-title">Advances & <em>Reconciliation</em></div>
+
+    <p style="font-size:.92rem;color:var(--paper-ink-dim);line-height:1.65;margin-bottom:1.25rem;">Travel advances cover out-of-pocket incidental expenses that cannot reasonably be charged to a credit card. Request advances 10–20 days before the trip. Only available to Columbia employees or students with an active Concur profile.</p>
+
+    <div class="notes-block" style="margin-bottom:1.25rem;">
+      <div class="notes-title">When Advances Are Typically Required</div>
+      <div class="note-item"><strong>International Travel</strong>Covering incidentals where credit cards may not be accepted.</div>
+      <div class="note-item"><strong>Team or Group Travel</strong>Large groups with multiple concurrent out-of-pocket needs.</div>
+      <div class="note-item"><strong>Recruiting Travel</strong>Covering expenses for prospective employees during the recruitment process.</div>
+    </div>
+
+    <table class="policy-table">
+      <thead>
+        <tr><th>Milestone</th><th>Timeframe</th><th>Consequence of Inaction</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Target reconciliation</td>
+          <td>Within 20 working days after trip</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Hard reconciliation deadline</td>
+          <td>Within 90 days of trip end date</td>
+          <td>Must reconcile before a new advance can be issued</td>
+        </tr>
+        <tr>
+          <td>Reminder emails begin</td>
+          <td>60 days past trip end date (weekly)</td>
+          <td>Weekly emails from Accounts Payable until reconciled</td>
+        </tr>
+        <tr>
+          <td>Final unreconciled deadline</td>
+          <td class="amt-red">120 days past trip end date</td>
+          <td>Advance privileges suspended; reported as W-2 income; taxes withheld</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warning-box">
+      <div class="box-label">Important</div>
+      Once an unsettled advance is added to Form W-2, it <strong>cannot be reversed</strong>. If expenses are less than the advance, reimburse the University via personal check to natural account <strong>65399</strong>. Upon termination, all outstanding advances must be reconciled immediately.
+    </div>
+  </div>
+
+  <!-- OTHER KEY RULES -->
+  <div class="section" id="sec-other">
+    <div class="eyebrow">Additional Policy Areas</div>
+    <div class="section-title">Other <em>Rules</em></div>
+
+    <div class="notes-block">
+      <div class="notes-title">Key Rules by Category</div>
+      <div class="note-item">
+        <strong>Personal Travel Extensions</strong>
+        Extended stays may be reimbursed for air/rail if total cost is equal to or less than the business-only dates. Must document personal days in itinerary. Lodging, meals, and local transportation for personal days: not reimbursable.
+      </div>
+      <div class="note-item">
+        <strong>Frequent Flyer Miles & Rewards Points</strong>
+        Not reimbursable — no tickets, upgrades, or accommodations obtained via frequent flyer miles, credit card points, or airline rewards will be reimbursed.
+      </div>
+      <div class="note-item">
+        <strong>Cancellation / Change Fees</strong>
+        Reimbursable only when cancellation or change is required by business needs.
+      </div>
+      <div class="note-item">
+        <strong>Conference & Meeting Fees</strong>
+        Reimbursable. Prefer P-Card or direct University billing. If paid personally, submit conference flyer, registration, or agenda with dates, location, amount, and proof of payment. May be reimbursed in advance of travel with proper documentation.
+      </div>
+      <div class="note-item">
+        <strong>Baggage Fees</strong>
+        First and second checked bags reimbursable if needed for business. If bag is for personal use during a combined business/leisure trip (e.g., golf clubs, skis), the extra charge is not reimbursable.
+      </div>
+      <div class="note-item">
+        <strong>Trip Cancellation Insurance</strong>
+        May be purchased in special circumstances with Financial Officer agreement and supporting documentation.
+      </div>
+      <div class="note-item">
+        <strong>Tax-Exempt Status</strong>
+        Present tax-exempt status at purchase. Travel industry often will not recognize it — taxes paid will be reimbursed. Contact Finance Service Center at 212-854-2122 for exemption forms.
+      </div>
+      <div class="note-item">
+        <strong>Travel Accident Insurance</strong>
+        University provides 24-hour Business Travel Accident coverage for full-time employees and graduate/teaching assistants while traveling on business. Supplemental insurance is not reimbursable. Employees under collective bargaining agreements are excluded unless specifically covered.
+      </div>
+      <div class="note-item">
+        <strong>Non-Employee / Visitor Reimbursements</strong>
+        Prospective hires, lecturers, guest speakers, and consultants (with signed agreement) may be reimbursed for travel. Must be informed of policy in advance. Non-US residents require Form I-94 or passport visa stamp. Subject to 1099 reporting if not properly documented.
+      </div>
+      <div class="note-item">
+        <strong>Emergency Supplies / Equipment</strong>
+        Under $500: reimbursable. $500–$2,500: requires Financial Approval. Over $2,500: requires Purchasing approval.
+      </div>
+      <div class="note-item">
+        <strong>Personal Travel Bookings</strong>
+        Personal travel may not be booked in Concur or via World Travel counselors. Personal car rentals and hotels at negotiated rates may be booked via the Columbia Visitors & Personal Travel Portal. Family/companion travel on the same trip as a Columbia traveler must be booked by phone with World Travel — never in Concur — and paid with a personal card.
+      </div>
+    </div>
+  </div>
+
+  <!-- MISCELLANEOUS REIMBURSABLE -->
+  <div class="section" id="sec-misc">
+    <div class="eyebrow">Allowable Expenses</div>
+    <div class="section-title">Miscellaneous <em>Reimbursables</em></div>
+    <div class="two-col">
+      <div class="col-block green-border">
+        <div class="col-block-title green">✓ Reimbursable During Travel</div>
+        <ul class="check-list" style="font-size:.85rem;">
+          <li>Baggage handling and storage</li>
+          <li>Business office expenses (copies, postage)</li>
+          <li>Business-related phone/cell/fax/internet</li>
+          <li>Up to 3 personal calls per day (reasonable duration)</li>
+          <li>Currency conversion, ATM, traveler's check fees</li>
+          <li>Excess baggage for University-required items</li>
+          <li>Reasonable tips to porters, bellhops, service personnel</li>
+          <li>Internet access</li>
+          <li>Vaccinations for international business travel</li>
+          <li>Laundry/cleaning on trips exceeding 5 days</li>
+        </ul>
+      </div>
+      <div class="col-block red-border">
+        <div class="col-block-title red">✕ Non-Reimbursable</div>
+        <ul class="x-list" style="font-size:.85rem;">
+          <li>Airline/VIP club memberships or day passes</li>
+          <li>Airphone usage</li>
+          <li>Babysitting / pet care</li>
+          <li>Barbers, hairdressers, clothing, toiletries</li>
+          <li>Home internet charges</li>
+          <li>Expenses for personal vacation days in trip</li>
+          <li>Frequent flyer or rewards point redemptions</li>
+          <li>Gift cards as payment mechanism</li>
+          <li>Helicopter for local travel/entertainment</li>
+          <li>Laundry on trips 5 days or less (unless emergency)</li>
+          <li>Lost/stolen cash, tickets, or personal property</li>
+          <li>Lost baggage / luggage / briefcases</li>
+          <li>Magazines, newspapers, personal reading</li>
+          <li>Medical expenses while traveling</li>
+          <li>Mini-bar alcohol / movies / snacks</li>
+          <li>"No-show" charges for hotel or car service</li>
+          <li>Online auction sites</li>
+          <li>Personal entertainment / souvenirs / personal gifts</li>
+          <li>Recreational expenses</li>
+          <li>Saunas, massages, spa visits, shoe shines</li>
+          <li>Tips exceeding 20%</li>
+        </ul>
+      </div>
+    </div>
+    <div class="approval-box">
+      <div class="box-label">Policy Exception Process</div>
+      If a valid business reason exists for any non-reimbursable expense, a policy exception must receive SBO approval. Accounts Payable will accept SBO approval via email attached to the voucher or as an ad-hoc approver in the system.
+    </div>
+  </div>
+
+  <!-- GOLDEN RULE -->
+  <div class="golden-rule">
+    <strong>The Core Standard:</strong> All travel expenses must be for a valid business purpose that is necessary and reasonable. Ask yourself: would a knowledgeable third-party reviewer — or a front-page newspaper reporter — understand and accept why this expense was incurred? The University's 501(c)(3) status depends on prudent stewardship of funds entrusted by students, donors, and taxpayers. When in doubt, ask before you spend.
+  </div>
+
+</main>
+
+<script>
+const glossary = [
+  { term: "Traveler / Payee", def: "The employee or student incurring travel expenses. Responsible for receipts, business purpose documentation, and timely Expense Report submission in Concur." },
+  { term: "Expense Report (Concur)", def: "The official University system for submitting reimbursement requests. All travel expense reports must be submitted and approved in Concur." },
+  { term: "SBO — Senior Business Officer", def: "Officer designated with authority to approve policy exceptions, lodging over 50% above threshold, and out-of-policy requests." },
+  { term: "LLF — Lowest Logical Fare", def: "The least expensive non-refundable fare for non-stop flights (or minimum stops if non-stop unavailable) that allows the traveler to achieve the business objective without prolonging the trip." },
+  { term: "BTA — Business Travel Account", def: "Air/Rail Central Pay Account — a University-level account used to pay for air and rail directly, so travelers are not out-of-pocket for these expenses." },
+  { term: "TMC — Travel Management Company", def: "The University's preferred travel agency (World Travel). Has access to University-negotiated discounts and is aware of reimbursement policy. Recommended for all travel bookings." },
+  { term: "Fly America Act", def: "Federal requirement that travelers on government-sponsored grants must fly on US-owned airlines or US-designated codeshare flights, with limited exceptions. Non-compliance requires the Fly America Exception Form." },
+  { term: "NDC — New Distribution Capability", def: "Airline pricing method that bundles services (seat, bag, priority boarding) into a single upfront fare. Allowed if pre-approved by department and cost-effective vs. base fare plus add-ons." },
+  { term: "Imputed Income", def: "Reimbursements that don't meet IRS accountable plan requirements are treated as taxable compensation and reported on Form W-2. Late submissions (120+ days) may trigger this." },
+  { term: "Accountable Plan", def: "IRS framework requiring: (1) business purpose, (2) adequate documentation, (3) return of excess advances. Compliance keeps reimbursements non-taxable." },
+  { term: "Segregated Costs", def: "Expenses the federal government deems unallowable on grants (alcohol, entertainment, excess travel class, luxury hotels) must be charged to a separate account — not to grant funds. Segregated does not mean non-reimbursable." },
+  { term: "LDW — Loss Damage Waiver", def: "Rental car insurance covering damage to the vehicle. Included in Hertz domestic rentals by University agreement. Must be purchased separately with other rental companies. Always required internationally." },
+  { term: "GSA Rate", def: "Government Services Administration per diem rate for meals and incidentals. Required for sponsored project travel using per diems." },
+  { term: "Form 1099", def: "IRS tax reporting form for non-employee reimbursements. Required documentation (name, address, SSN) needed when payments are not properly supported." },
+  { term: "Natural Account 65399", def: "The account to which unused advance funds must be deposited when returning money to the University (via personal check)." },
+  { term: "IRS Mileage Rate", def: "Federal rate for personal vehicle reimbursement: $0.700/mile (2025); $0.725/mile (2026). Covers all vehicle operating costs — no separate reimbursement for fuel, insurance, or maintenance." }
+];
+
+const contacts = [
+  { icon: "📞", name: "Finance Service Center", desc: "General policy inquiries, tax-exempt status, exemption forms, state list.\nPhone: 212-854-2122" },
+  { icon: "💼", name: "Accounts Payable", desc: "Expense Report processing, audit inquiries, policy exceptions, advance reconciliation, imputed income determinations." },
+  { icon: "✈️", name: "World Travel (TMC)", desc: "University's preferred Travel Management Company. Book air, rail, hotel, and rental cars. Access negotiated rates and corporate discounts." },
+  { icon: "🌐", name: "Columbia Visitors & Personal Travel Portal", desc: "For personal car rental and hotel bookings at negotiated CU rates. Do NOT use Concur for personal travel." },
+  { icon: "🔬", name: "Sponsored Projects Administration", desc: "Questions on travel or business expenses reimbursable under a specific grant or contract." },
+  { icon: "🛡️", name: "Risk Management Department", desc: "Specific details on University Business Travel Accident Insurance coverage, terms, and conditions." },
+  { icon: "🏛️", name: "VP Human Resources / University Controller", desc: "Pre-approval required for commuting exceptions when employee's assigned work location is outside normal commuting distance." }
+];
+
+const panel = document.getElementById('sidePanel');
+const overlay = document.getElementById('overlay');
+const panelClose = document.getElementById('panelClose');
+const panelBody = document.getElementById('panelBody');
+const panelTitle = document.getElementById('panelTitle');
+const panelEyebrow = document.getElementById('panelEyebrow');
+const hintUp = document.getElementById('hintUp');
+const hintRight = document.getElementById('hintRight');
+
+let currentMode = null;
+
+function updateHints() {
+  hintUp.classList.toggle('lit', currentMode === 'glossary');
+  hintRight.classList.toggle('lit', currentMode === 'contacts');
+}
+
+function openGlossary() {
+  panelEyebrow.textContent = 'Reference';
+  panelTitle.textContent = 'Definitions';
+  panelBody.innerHTML = glossary.map(g => `
+    <div class="glo-entry">
+      <div class="glo-term">${g.term}</div>
+      <div class="glo-def">${g.def}</div>
+    </div>`).join('');
+  panel.classList.add('open');
+  overlay.classList.add('active');
+  currentMode = 'glossary';
+  updateHints();
+}
+
+function openContacts() {
+  panelEyebrow.textContent = 'Finance & Admin';
+  panelTitle.textContent = 'Key Contacts';
+  panelBody.innerHTML = contacts.map(c => `
+    <div class="contact-entry">
+      <div class="contact-icon">${c.icon}</div>
+      <div>
+        <div class="contact-name">${c.name}</div>
+        <div class="contact-desc">${c.desc.replace(/\n/g,'<br>')}</div>
+      </div>
+    </div>`).join('');
+  panel.classList.add('open');
+  overlay.classList.add('active');
+  currentMode = 'contacts';
+  updateHints();
+}
+
+function closePanel() {
+  panel.classList.remove('open');
+  overlay.classList.remove('active');
+  currentMode = null;
+  updateHints();
+}
+
+panelClose.addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' || e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (currentMode) closePanel();
+    return;
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    currentMode === 'glossary' ? closePanel() : openGlossary();
+  }
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    currentMode === 'contacts' ? closePanel() : openContacts();
+  }
+});
+
+const fill = document.getElementById('progressFill');
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  fill.style.width = Math.min(pct, 100) + '%';
+}, { passive: true });
+
+updateHints();
+</script>
+</body>
+</html>
